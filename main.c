@@ -1,32 +1,19 @@
 #include <stdio.h>
 #include <string.h>
+#pragma warning(disable: 4996)
 
 enum
 {
     LIMIT_STRING_COMPANY = 30,
     LIMIT_STRING = 100,
+    MAX_COMPANY = 100,
 };
 
 typedef struct
 {
     char name[LIMIT_STRING_COMPANY];
-    int id;
+    unsigned char companyType;
 } Conpany;
-
-typedef struct
-{
-    Conpany conpany;
-} Operator;
-
-typedef struct
-{
-    Conpany conpany;
-} Agence;
-
-typedef struct
-{
-    Conpany conpany;
-} Intervenant;
 
 typedef struct
 {
@@ -52,19 +39,8 @@ mot segmentation(unsigned int i, unsigned int limit, char input[LIMIT_STRING])
     return result;
 }
 
-unsigned char operation(char input[LIMIT_STRING_COMPANY])
-{
-    if (strcmp(input, "inscription") == 0)
-    {
-        return 1;
-    }
-
-    return 0;
-}
-
 unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
 {
-
     if (strlen(input) != 2)
     {
         return 0;
@@ -95,7 +71,8 @@ int main()
     char on = 1;
     char input[LIMIT_STRING];
     unsigned int lenght = 0;
-
+    Conpany company[MAX_COMPANY];
+    unsigned char countCompany = 0;
 
     while (on)
     {
@@ -111,34 +88,47 @@ int main()
             lenght = strlen(input);
             currentMot = segmentation(currentMot.index, lenght, input);
 
-            switch (operation(currentMot.mot))
+            if (strcmp(currentMot.mot, "inscription") == 0)
             {
-            case 1: /* inscription */
                 currentMot = segmentation(currentMot.index, lenght, input);
-
-                int companyType = (getInscriptionCompanyType(currentMot.mot));
-                if (companyType)
+                unsigned char currentCompanyType = (getInscriptionCompanyType(currentMot.mot));
+                if (currentCompanyType)
                 {
-                    /* code */
+                    unsigned char exist = 0;
+                    currentMot = segmentation(currentMot.index, lenght, input);
+                    
+                    for (int k = 0; k < countCompany; k++)
+                    {
+                        if(strcmp(company[k].name, currentMot.mot) == 0)
+                        {
+                            exist = 1;
+                            printf("Nom incorrect\n");
+                        }
+                    }
+                    if (!exist)
+                    {
+                       strcpy(company[countCompany].name, currentMot.mot);
+                       company[countCompany].companyType = currentCompanyType;
+                       printf("Inscription realisee (%u)\n", countCompany + 1);
+                       countCompany++;
+                    }
+                    
+                    
                 }
 
                 else
                 {
                     printf("Role incorrect\n");
                 }
-                
-                break;
-
-            default:
-                printf("operation non prise en charge\n");
-                break;
+            }
+            else
+            {
+                printf("Commande incorrect\n");
             }
 
         }
 
     }
-
-
 
     return 0;
 }
