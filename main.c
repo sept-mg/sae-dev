@@ -43,8 +43,7 @@ mot segmentation(unsigned int i, unsigned int limit, char input[LIMIT_STRING])
         currentChar[i] = input[i];
         i++;
     }
-
-    printf("%s\n", currentChar);
+    currentChar[i+1] = '\0';
     strcpy(result.mot, currentChar);
     result.index = i+1;
     return result;
@@ -54,10 +53,10 @@ unsigned char operation(char input[LIMIT_STRING_COMPANY])
 {
     if (strcmp (input, "inscription") == 0)
     {
-        return 0;
+        return 1;
     }
-    
-    
+
+    return 0;
 }
 
 
@@ -83,7 +82,7 @@ int main()
             
             switch (operation(currentMot.mot))
             {
-                case 0: /* inscription */
+                case 1: /* inscription */
                     currentMot = segmentation(currentMot.index, lenght, input);
                     printf("%s\n", currentMot.mot);
                     break;

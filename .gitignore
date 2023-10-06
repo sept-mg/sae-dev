@@ -1,2 +1,6 @@
 .vscode
 *.exe
+
+# Ignorer les fichiers sans extension
+*.*
+!*/
