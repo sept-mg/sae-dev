@@ -38,12 +38,15 @@ mot segmentation(unsigned int i, unsigned int limit, char input[LIMIT_STRING])
 {
     mot result;
     char currentChar[LIMIT_STRING_COMPANY] = "";
-    while (input[i] != ' ' && i < limit)
+    int j = 0; // Separate index for currentChar array
+
+    while (input[i] != ' ' && i < limit && input[i] != '\0')
     {
-        currentChar[i] = input[i];
+        currentChar[j] = input[i];
         i++;
+        j++;
     }
-    currentChar[i + 1] = '\0';
+    currentChar[j] = '\0'; // Null-terminate the current word
     strcpy(result.mot, currentChar);
     result.index = i + 1;
     return result;
@@ -59,6 +62,32 @@ unsigned char operation(char input[LIMIT_STRING_COMPANY])
     return 0;
 }
 
+unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
+{
+
+    if (strlen(input) != 2)
+    {
+        return 0;
+    }
+    
+
+    if (input[0] == 'O' && input[1] == 'P')
+    {
+        return 1;
+    }
+    
+    else if (input[0] == 'A' && input[1] == 'G')
+    {
+        return 2;
+    }
+
+    else if (input[0] == 'I' && input[1] == 'N')
+    {
+        return 3;
+    }
+    return 0;
+}
+
 
 
 int main()
@@ -66,6 +95,8 @@ int main()
     char on = 1;
     char input[LIMIT_STRING];
     unsigned int lenght = 0;
+
+
     while (on)
     {
         gets(input);
@@ -84,7 +115,18 @@ int main()
             {
             case 1: /* inscription */
                 currentMot = segmentation(currentMot.index, lenght, input);
-                printf("%s\n", currentMot.mot);
+
+                int companyType = (getInscriptionCompanyType(currentMot.mot));
+                if (companyType)
+                {
+                    /* code */
+                }
+
+                else
+                {
+                    printf("Role incorrect\n");
+                }
+                
                 break;
 
             default:
