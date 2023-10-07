@@ -11,6 +11,91 @@ enum
     MAX_MISSION = 100,
 };
 
+float stringToFloat(char input[LIMIT_STRING])
+{
+    float result = 0;
+    unsigned int shift = 1;
+    unsigned int lenght = strlen(input);
+    char signe = (input[0] == '-') ? -1 : 1;
+    unsigned int i = (input[0] == '-' || input[0] == '+') ? 1 : 0;
+
+
+    for (; i < lenght; i++)
+    {
+        switch (input[i])
+        {
+        case '0':
+            result = result * 10;
+            break;
+
+        case '1':
+            result = result * 10 + 1;
+            break;
+
+        case '2':
+            result = result * 10 + 2;
+            break;
+
+        case '3':
+            result = result * 10 + 3;
+            break;
+
+        case '4':
+            result = result * 10 + 4;
+            break;
+
+        case '5':
+            result = result * 10 + 5;
+            break;
+
+        case '6':
+            result = result * 10 + 6;
+            break;
+
+        case '7':
+            result = result * 10 + 7;
+            break;
+
+        case '8':
+            result = result * 10 + 8;
+            break;
+
+        case '9':
+            result = result * 10 + 9;
+            break;
+
+        case '.':
+            for (int k = 0; k < lenght - i - 1; k++)
+            {
+                shift *= 10;
+            }
+            
+            break;
+
+        default:
+            i = lenght*2;
+            break;
+        }
+    }
+
+    if (i == lenght*2)
+    {
+        return 0;
+    }
+    
+    int temp = result / shift * signe * 1000;
+    if (temp % 10 > 4)
+    {
+        temp = temp / 10 + 1;
+    }
+    else
+    {
+        temp = temp / 10;
+    }
+    
+    return temp / 100.0;
+}
+
 typedef struct
 {
     char name[LIMIT_STRING_COMPANY];
@@ -124,8 +209,9 @@ int main()
                     {
                        strcpy(company[countCompany].name, currentMot.mot);
                        company[countCompany].companyType = currentCompanyType;
-                       printf("Inscription realisee (%u)\n", countCompany + 1);
                        countCompany++;
+                       printf("Inscription realisee (%u)\n", countCompany);
+                       
                     }
                     
                     
@@ -141,10 +227,10 @@ int main()
             {
                 unsigned char exist = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
-
+                int currentID = (int)stringToFloat(currentMot.mot);
                 for (int k = 0; k < countMission; k++)
                     {
-                        if(mission[k].id == currentMot.mot)
+                        if(mission[k].id == currentID)
                         {
                             exist = 1;
                             printf("Identifiant incorrect\n");
@@ -154,6 +240,24 @@ int main()
                 if (!exist)
                 {
                     currentMot = segmentation(currentMot.index, lenght, input);
+                    char currentName[LIMIT_STRING_MISSION];
+                    strcpy(currentName, currentMot.mot);
+
+                    currentMot = segmentation(currentMot.index, lenght, input);
+                    float currentRemuneration = stringToFloat(currentMot.mot);
+                    if (currentRemuneration < 0)
+                    {
+                        printf("Remuneration incorrecte\n");
+                    }
+                    else
+                    {
+                        mission[countMission].id = currentID;
+                        strcpy(mission[countMission].nom, currentName);
+                        mission[countMission].remuneration = currentRemuneration;
+                        countMission++;
+                        printf("Mission publiee (%u)\n", countMission);
+                        
+                    }
                 }
             }
             
