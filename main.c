@@ -5,8 +5,10 @@
 enum
 {
     LIMIT_STRING_COMPANY = 30,
+    LIMIT_STRING_MISSION = 30,
     LIMIT_STRING = 100,
     MAX_COMPANY = 100,
+    MAX_MISSION = 100,
 };
 
 typedef struct
@@ -14,6 +16,14 @@ typedef struct
     char name[LIMIT_STRING_COMPANY];
     unsigned char companyType;
 } Conpany;
+
+typedef struct
+{
+    unsigned int id;
+    char nom[LIMIT_STRING_MISSION];
+    float remuneration;
+} Mission;
+
 
 typedef struct
 {
@@ -71,8 +81,13 @@ int main()
     char on = 1;
     char input[LIMIT_STRING];
     unsigned int lenght = 0;
+
     Conpany company[MAX_COMPANY];
     unsigned char countCompany = 0;
+
+    Mission mission[MAX_MISSION];
+    unsigned char countMission = 0;
+
 
     while (on)
     {
@@ -121,6 +136,28 @@ int main()
                     printf("Role incorrect\n");
                 }
             }
+            
+            if (strcmp(currentMot.mot, "mission") == 0)
+            {
+                unsigned char exist = 0;
+                currentMot = segmentation(currentMot.index, lenght, input);
+
+                for (int k = 0; k < countMission; k++)
+                    {
+                        if(mission[k].id == currentMot.mot)
+                        {
+                            exist = 1;
+                            printf("Identifiant incorrect\n");
+                        }
+                    }
+
+                if (!exist)
+                {
+                    currentMot = segmentation(currentMot.index, lenght, input);
+                }
+            }
+            
+
             else
             {
                 printf("Commande incorrect\n");
