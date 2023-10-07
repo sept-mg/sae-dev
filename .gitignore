@@ -2,8 +2,6 @@
 *.exe
 .vs
 # Ignorer les fichiers sans extension
-*.*
-!*/
+
 sae-dev.sln
 sae-dev/
-#test.c
