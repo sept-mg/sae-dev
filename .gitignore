@@ -1,7 +1,3 @@
-.vscode
+x64/
 *.exe
 .vs
-# Ignorer les fichiers sans extension
-
-sae-dev.sln
-sae-dev/

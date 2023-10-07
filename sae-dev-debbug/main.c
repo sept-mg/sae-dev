@@ -15,9 +15,9 @@ float stringToFloat(char input[LIMIT_STRING])
 {
     float result = 0;
     unsigned int shift = 1;
-    unsigned int lenght = strlen(input);
+    int lenght = strlen(input);
     char signe = (input[0] == '-') ? -1 : 1;
-    unsigned int i = (input[0] == '-' || input[0] == '+') ? 1 : 0;
+    int i = (input[0] == '-' || input[0] == '+') ? 1 : 0;
 
 
     for (; i < lenght; i++)
@@ -69,20 +69,20 @@ float stringToFloat(char input[LIMIT_STRING])
             {
                 shift *= 10;
             }
-            
+
             break;
 
         default:
-            i = lenght*2;
+            i = lenght * 2;
             break;
         }
     }
 
-    if (i == lenght*2)
+    if (i == lenght * 2)
     {
         return 0;
     }
-    
+
     int temp = result / shift * signe * 1000;
     if (temp % 10 > 4)
     {
@@ -92,8 +92,8 @@ float stringToFloat(char input[LIMIT_STRING])
     {
         temp = temp / 10;
     }
-    
-    return temp / 100.0;
+
+    return (float) temp / 100;
 }
 
 typedef struct
@@ -105,7 +105,7 @@ typedef struct
 typedef struct
 {
     unsigned int id;
-    char nom[LIMIT_STRING_MISSION];
+    char name[LIMIT_STRING_MISSION];
     unsigned char company;
     float remuneration;
 } Mission;
@@ -141,13 +141,13 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
     {
         return 0;
     }
-    
+
 
     if (input[0] == 'O' && input[1] == 'P')
     {
         return 1;
     }
-    
+
     else if (input[0] == 'A' && input[1] == 'G')
     {
         return 2;
@@ -165,7 +165,7 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
 int main()
 {
     char on = 1;
-    char input[LIMIT_STRING];
+    char input[LIMIT_STRING] = "";
     unsigned int lenght = 0;
 
     Conpany company[MAX_COMPANY];
@@ -197,10 +197,10 @@ int main()
                 {
                     unsigned char exist = 0;
                     currentMot = segmentation(currentMot.index, lenght, input);
-                    
+
                     for (int k = 0; k < countCompany; k++)
                     {
-                        if(strcmp(company[k].name, currentMot.mot) == 0)
+                        if (strcmp(company[k].name, currentMot.mot) == 0)
                         {
                             exist = 1;
                             printf("Nom incorrect\n");
@@ -208,14 +208,14 @@ int main()
                     }
                     if (!exist)
                     {
-                       strcpy(company[countCompany].name, currentMot.mot);
-                       company[countCompany].companyType = currentCompanyType;
-                       countCompany++;
-                       printf("Inscription realisee (%u)\n", countCompany);
-                       
+                        strcpy(company[countCompany].name, currentMot.mot);
+                        company[countCompany].companyType = currentCompanyType;
+                        countCompany++;
+                        printf("Inscription realisee (%u)\n", countCompany);
+
                     }
-                    
-                    
+
+
                 }
 
                 else
@@ -223,21 +223,26 @@ int main()
                     printf("Role incorrect\n");
                 }
             }
-            
+
             else if (strcmp(currentMot.mot, "mission") == 0)
             {
                 unsigned char find = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
                 int currentID = (int)stringToFloat(currentMot.mot);
                 int j = 0;
-                for (; j < countCompany; j++)
+                while (j < countCompany && !find)
+                {
+                    if ((company[j].companyType == 1 || company[j].companyType == 2) && j + 1 == currentID)
                     {
-                        if((company[j].companyType == 1 || company[j].companyType == 2) && j+1 == currentID)
-                        {
-                            find = 1;
-                            
-                        }
+                        find = 1;
+
                     }
+                    else
+                    {
+                        j++;
+                    }
+                    
+                }
 
                 if (find)
                 {
@@ -253,13 +258,14 @@ int main()
                     }
                     else
                     {
-                        countMission++;
-                        mission[countMission].id = countMission;
-                        strcpy(mission[countMission].nom, currentName);
+                        
+                        mission[countMission].id = countMission+1;
+                        strcpy(mission[countMission].name, currentName);
                         mission[countMission].remuneration = currentRemuneration;
                         mission[countMission].company = j;
+                        countMission++;
                         printf("Mission publiee (%u)\n", countMission);
-                        
+
                     }
                 }
                 else
@@ -267,7 +273,7 @@ int main()
                     printf("Identifiant incorrect\n");
                 }
             }
-            
+
             else if (strcmp(currentMot.mot, "consultation") == 0)
             {
                 if (countMission == 0)
@@ -278,11 +284,11 @@ int main()
                 {
                     for (unsigned char k = 0; k < countMission; k++)
                     {
-                        printf("%u %s %s %.2f\n", mission[k].id, mission[k].nom, company[mission[k].company].name, mission[k].remuneration);
+                        printf("%u %s %s %.2f\n", mission[k].id, mission[k].name, company[mission[k].company].name, mission[k].remuneration);
                     }
-                    
+
                 }
-                
+
             }
 
             else
