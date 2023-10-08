@@ -108,7 +108,7 @@ typedef struct
     char name[LIMIT_STRING_MISSION];
     unsigned char company;
     float remuneration;
-    unsigned char attributed;
+    unsigned char state;
 } Mission;
 
 
@@ -122,7 +122,7 @@ mot segmentation(unsigned int i, unsigned int limit, char input[LIMIT_STRING])
 {
     mot result;
     char currentChar[LIMIT_STRING_COMPANY] = "";
-    int j = 0; // Separate index for currentChar array
+    int j = 0;
 
     while (input[i] != ' ' && i < limit && input[i] != '\0')
     {
@@ -130,7 +130,7 @@ mot segmentation(unsigned int i, unsigned int limit, char input[LIMIT_STRING])
         i++;
         j++;
     }
-    currentChar[j] = '\0'; // Null-terminate the current word
+    currentChar[j] = '\0';
     strcpy(result.mot, currentChar);
     result.index = i + 1;
     return result;
@@ -209,6 +209,7 @@ int main()
                         if (strcmp(company[k].name, currentMot.mot) == 0)
                         {
                             exist = 1;
+                            k = countCompany;
                             printf("Nom incorrect\n");
                         }
                     }
@@ -235,7 +236,7 @@ int main()
                 unsigned char find = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
                 int currentID = (int)stringToFloat(currentMot.mot);
-                int j = 0;
+                unsigned int j = 0;
                 while (j < countCompany && !find)
                 {
                     if ((company[j].companyType == 1 || company[j].companyType == 2) && j + 1 == currentID)
@@ -269,7 +270,7 @@ int main()
                         strcpy(mission[countMission].name, currentName);
                         mission[countMission].remuneration = currentRemuneration;
                         mission[countMission].company = j;
-                        mission[countMission].attributed = 0;
+                        mission[countMission].state = 0;
                         countMission++;
                         printf("Mission publiee (%u)\n", countMission);
 
@@ -286,7 +287,7 @@ int main()
                 unsigned char findMission = 0;
                 for (unsigned char k = 0; k < countMission; k++)
                 {
-                    if(!mission[k].attributed) 
+                    if(!mission[k].state) 
                     {
                         showMission(mission[k], company[mission[k].company].name);
                         findMission++;
@@ -305,7 +306,7 @@ int main()
                 int currentID = (int)stringToFloat(currentMot.mot);
                 for (unsigned char k = 0; k < countMission; k++)
                 {
-                    if (!mission[k].attributed && mission[k].id == currentID)
+                    if (!mission[k].state && mission[k].id == currentID)
                     {
                         showMission(mission[k], company[mission[k].company].name);
                         findMission++;
@@ -316,6 +317,53 @@ int main()
                 {
                     printf("Identifiant incorrect\n");
                 }
+
+            }
+
+            else if (strcmp(currentMot.mot, "acceptation") == 0)
+            {
+                unsigned char find = 0;
+                currentMot = segmentation(currentMot.index, lenght, input);
+                int currentID = (int)stringToFloat(currentMot.mot);
+                unsigned int j = 0;
+                while (j < countCompany && !find)
+                {
+                    if ((company[j].companyType == 2 || company[j].companyType == 3) && j + 1 == currentID)
+                    {
+                        find = 1;
+
+                    }
+                    else
+                    {
+                        j++;
+                    }
+
+                }
+                if (!find)
+                {
+                    printf("Entreprise incorrecte\n");
+                }
+                else
+                {
+                    unsigned char findMission = 0;
+                    currentMot = segmentation(currentMot.index, lenght, input);
+                    currentID = (int)stringToFloat(currentMot.mot);
+                    for (unsigned char k = 0; k < countMission; k++)
+                    {
+                        if (!mission[k].state && mission[k].id == currentID)
+                        {
+                            mission[k].state = 1;
+                            printf("Acceptation enregistree\n");
+                            findMission++;
+                            k = countMission;
+                        }
+                    }
+                    if (!findMission)
+                    {
+                        printf("Mission incorrecte\n");
+                    }
+                }
+
 
             }
 
