@@ -109,6 +109,7 @@ typedef struct
     unsigned char company;
     float remuneration;
     unsigned char state;
+    unsigned char subcontractingCount;
 } Mission;
 
 
@@ -163,7 +164,7 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
 
 void showMission(Mission mission, char companyName[LIMIT_STRING_COMPANY])
 {
-    printf("%u %s %s %.2f\n", mission.id, mission.name, companyName, mission.remuneration);
+    printf("%u %s %s %.2f (%u)\n", mission.id, mission.name, companyName, mission.remuneration, mission.subcontractingCount);
     // company[mission[k].company].name
 }
 
@@ -271,6 +272,7 @@ int main()
                         mission[countMission].remuneration = currentRemuneration;
                         mission[countMission].company = j;
                         mission[countMission].state = 0;
+                        mission[countMission].subcontractingCount = 0;
                         countMission++;
                         printf("Mission publiee (%u)\n", countMission);
 
@@ -364,6 +366,88 @@ int main()
                     }
                 }
 
+
+            }
+
+            else if (strcmp(currentMot.mot, "sous-traitance") == 0)
+            {
+                unsigned char find = 0;
+                currentMot = segmentation(currentMot.index, lenght, input);
+                int currentID = (int)stringToFloat(currentMot.mot);
+                unsigned int j = 0;
+                while (j < countCompany && !find)
+                {
+                    if (company[j].companyType == 2 && j + 1 == currentID)
+                    {
+                        find = 1;
+
+                    }
+                    else
+                    {
+                        j++;
+                    }
+
+                }
+                if (!find)
+                {
+                    printf("Entreprise incorrecte\n");
+                }
+                else
+                {
+                    unsigned char findMission = 0;
+                    currentMot = segmentation(currentMot.index, lenght, input);
+                    currentID = (int)stringToFloat(currentMot.mot);
+                    unsigned int k = 0;
+                    while (k < countMission && !findMission)
+                    {
+                        if (mission[k].id == currentID && !mission[k].state)
+                        {
+                            if (mission[k].subcontractingCount < 5)
+                            {
+                                findMission = 1;
+                            }
+                            else
+                            {
+                                k = countMission;
+                            }
+
+                        }
+                        else
+                        {
+                            k++;
+                        }
+
+                    }
+                    if (!findMission)
+                    {
+                        printf("Mission incorrecte\n");
+                    }
+                    else
+                    {
+                        currentMot = segmentation(currentMot.index, lenght, input);
+                        float currentRemuneration = stringToFloat(currentMot.mot);
+                        if (currentRemuneration < 0)
+                        {
+                            printf("Remuneration incorrecte\n");
+                        }
+                        else
+                        {
+                            mission[countMission].id = countMission + 1;
+                            strcpy(mission[countMission].name, mission[k].name);
+                            mission[countMission].remuneration = currentRemuneration;
+                            mission[countMission].company = j;
+                            mission[countMission].state = 0;
+                            mission[countMission].subcontractingCount = mission[k].subcontractingCount + 1;
+                            countMission++;
+                            mission[k].state = 1;
+                            printf("Sous-traitance enregistree (%u)\n", countMission);
+                        }
+                    }
+                }
+            }
+
+            else if (strcmp(currentMot.mot, "rapport") == 0)
+            {
 
             }
 
