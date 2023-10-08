@@ -7,8 +7,8 @@ enum
     LIMIT_STRING_COMPANY = 30,
     LIMIT_STRING_MISSION = 30,
     LIMIT_STRING = 100,
-    MAX_COMPANY = 100,
-    MAX_MISSION = 100,
+    MAX_COMPANY = 50,
+    MAX_MISSION = 500,
 };
 
 float stringToFloat(char input[LIMIT_STRING])
@@ -104,9 +104,9 @@ typedef struct
 
 typedef struct
 {
-    unsigned int id;
+    unsigned short id;
     char name[LIMIT_STRING_MISSION];
-    unsigned char company;
+    unsigned short company;
     float remuneration;
     unsigned char state;
     unsigned char subcontractingCount;
@@ -116,14 +116,14 @@ typedef struct
 typedef struct
 {
     char mot[LIMIT_STRING_COMPANY];
-    int index;
+    unsigned short index;
 } mot;
 
-mot segmentation(unsigned int i, unsigned int limit, char input[LIMIT_STRING])
+mot segmentation(unsigned short i, unsigned short limit, char input[LIMIT_STRING])
 {
     mot result;
     char currentChar[LIMIT_STRING_COMPANY] = "";
-    int j = 0;
+    unsigned short j = 0;
 
     while (input[i] != ' ' && i < limit && input[i] != '\0')
     {
@@ -173,7 +173,7 @@ int main()
 {
     char on = 1;
     char input[LIMIT_STRING] = "";
-    unsigned int lenght = 0;
+    unsigned char lenght = 0;
 
     Company company[MAX_COMPANY];
     unsigned char countCompany = 0;
@@ -205,7 +205,7 @@ int main()
                     unsigned char exist = 0;
                     currentMot = segmentation(currentMot.index, lenght, input);
 
-                    for (int k = 0; k < countCompany; k++)
+                    for (unsigned short k = 0; k < countCompany; k++)
                     {
                         if (strcmp(company[k].name, currentMot.mot) == 0)
                         {
@@ -236,7 +236,7 @@ int main()
             {
                 unsigned char find = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
-                int currentID = (int)stringToFloat(currentMot.mot);
+                short currentID = (short)stringToFloat(currentMot.mot);
                 unsigned int j = 0;
                 while (j < countCompany && !find)
                 {
@@ -260,7 +260,7 @@ int main()
 
                     currentMot = segmentation(currentMot.index, lenght, input);
                     float currentRemuneration = stringToFloat(currentMot.mot);
-                    if (currentRemuneration < 0)
+                    if (currentRemuneration <= 0)
                     {
                         printf("Remuneration incorrecte\n");
                     }
@@ -287,7 +287,7 @@ int main()
             else if (strcmp(currentMot.mot, "consultation") == 0)
             {
                 unsigned char findMission = 0;
-                for (unsigned char k = 0; k < countMission; k++)
+                for (unsigned short k = 0; k < countMission; k++)
                 {
                     if(!mission[k].state) 
                     {
@@ -305,8 +305,8 @@ int main()
             {
                 unsigned char findMission = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
-                int currentID = (int)stringToFloat(currentMot.mot);
-                for (unsigned char k = 0; k < countMission; k++)
+                short currentID = (short)stringToFloat(currentMot.mot);
+                for (unsigned short k = 0; k < countMission; k++)
                 {
                     if (!mission[k].state && mission[k].id == currentID)
                     {
@@ -326,8 +326,8 @@ int main()
             {
                 unsigned char find = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
-                int currentID = (int)stringToFloat(currentMot.mot);
-                unsigned int j = 0;
+                short currentID = (short)stringToFloat(currentMot.mot);
+                unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
                     if ((company[j].companyType == 2 || company[j].companyType == 3) && j + 1 == currentID)
@@ -349,7 +349,7 @@ int main()
                 {
                     unsigned char findMission = 0;
                     currentMot = segmentation(currentMot.index, lenght, input);
-                    currentID = (int)stringToFloat(currentMot.mot);
+                    currentID = (short)stringToFloat(currentMot.mot);
                     for (unsigned char k = 0; k < countMission; k++)
                     {
                         if (!mission[k].state && mission[k].id == currentID)
@@ -373,8 +373,8 @@ int main()
             {
                 unsigned char find = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
-                int currentID = (int)stringToFloat(currentMot.mot);
-                unsigned int j = 0;
+                short currentID = (short)stringToFloat(currentMot.mot);
+                unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
                     if (company[j].companyType == 2 && j + 1 == currentID)
@@ -396,8 +396,8 @@ int main()
                 {
                     unsigned char findMission = 0;
                     currentMot = segmentation(currentMot.index, lenght, input);
-                    currentID = (int)stringToFloat(currentMot.mot);
-                    unsigned int k = 0;
+                    currentID = (short)stringToFloat(currentMot.mot);
+                    unsigned short k = 0;
                     while (k < countMission && !findMission)
                     {
                         if (mission[k].id == currentID && !mission[k].state)
@@ -426,7 +426,7 @@ int main()
                     {
                         currentMot = segmentation(currentMot.index, lenght, input);
                         float currentRemuneration = stringToFloat(currentMot.mot);
-                        if (currentRemuneration < 0)
+                        if (currentRemuneration <= 0)
                         {
                             printf("Remuneration incorrecte\n");
                         }
@@ -448,7 +448,10 @@ int main()
 
             else if (strcmp(currentMot.mot, "rapport") == 0)
             {
-
+                unsigned char findMission = 0;
+                currentMot = segmentation(currentMot.index, lenght, input);
+                short currentID = (short)stringToFloat(currentMot.mot);
+                printf("WIP\n");
             }
 
             else
