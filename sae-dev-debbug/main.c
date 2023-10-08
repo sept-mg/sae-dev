@@ -100,7 +100,7 @@ typedef struct
 {
     char name[LIMIT_STRING_COMPANY];
     unsigned char companyType;
-} Conpany;
+} Company;
 
 typedef struct
 {
@@ -108,6 +108,7 @@ typedef struct
     char name[LIMIT_STRING_MISSION];
     unsigned char company;
     float remuneration;
+    unsigned char attributed;
 } Mission;
 
 
@@ -160,6 +161,11 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
     return 0;
 }
 
+void showMission(Mission mission, char companyName[LIMIT_STRING_COMPANY])
+{
+    printf("%u %s %s %.2f\n", mission.id, mission.name, companyName, mission.remuneration);
+    // company[mission[k].company].name
+}
 
 
 int main()
@@ -168,7 +174,7 @@ int main()
     char input[LIMIT_STRING] = "";
     unsigned int lenght = 0;
 
-    Conpany company[MAX_COMPANY];
+    Company company[MAX_COMPANY];
     unsigned char countCompany = 0;
 
     Mission mission[MAX_MISSION];
@@ -263,6 +269,7 @@ int main()
                         strcpy(mission[countMission].name, currentName);
                         mission[countMission].remuneration = currentRemuneration;
                         mission[countMission].company = j;
+                        mission[countMission].attributed = 0;
                         countMission++;
                         printf("Mission publiee (%u)\n", countMission);
 
@@ -276,17 +283,38 @@ int main()
 
             else if (strcmp(currentMot.mot, "consultation") == 0)
             {
-                if (countMission == 0)
+                unsigned char findMission = 0;
+                for (unsigned char k = 0; k < countMission; k++)
+                {
+                    if(!mission[k].attributed) 
+                    {
+                        showMission(mission[k], company[mission[k].company].name);
+                        findMission++;
+                    }
+                }
+                if(!findMission) 
                 {
                     printf("Aucune mission disponible\n");
                 }
-                else
-                {
-                    for (unsigned char k = 0; k < countMission; k++)
-                    {
-                        printf("%u %s %s %.2f\n", mission[k].id, mission[k].name, company[mission[k].company].name, mission[k].remuneration);
-                    }
+            }
 
+            else if (strcmp(currentMot.mot, "detail") == 0)
+            {
+                unsigned char findMission = 0;
+                currentMot = segmentation(currentMot.index, lenght, input);
+                int currentID = (int)stringToFloat(currentMot.mot);
+                for (unsigned char k = 0; k < countMission; k++)
+                {
+                    if (!mission[k].attributed && mission[k].id == currentID)
+                    {
+                        showMission(mission[k], company[mission[k].company].name);
+                        findMission++;
+                        k = countMission;
+                    }
+                }
+                if (!findMission)
+                {
+                    printf("Identifiant incorrect\n");
                 }
 
             }
