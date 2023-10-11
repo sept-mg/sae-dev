@@ -9,6 +9,7 @@ enum
     LIMIT_STRING = 100,
     MAX_COMPANY = 50,
     MAX_MISSION = 500,
+    MAX_RAPPORT = 4,
 };
 
 float stringToFloat(char input[LIMIT_STRING])
@@ -96,6 +97,21 @@ float stringToFloat(char input[LIMIT_STRING])
     return (float) temp / 100;
 }
 
+float arroundFloat(float input)
+{
+    int temp = input * 1000;
+    if (temp % 10 > 4)
+    {
+        temp = temp / 10 + 1;
+    }
+    else
+    {
+        temp = temp / 10;
+    }
+
+    return (float) temp / 100;
+}
+
 typedef struct
 {
     char name[LIMIT_STRING_COMPANY];
@@ -110,6 +126,7 @@ typedef struct
     float remuneration;
     unsigned char state;
     unsigned char subcontractingCount;
+    short idSubcontracting;
 } Mission;
 
 
@@ -179,14 +196,15 @@ int main()
     unsigned char countCompany = 0;
 
     Mission mission[MAX_MISSION];
-    unsigned char countMission = 0;
-
+    unsigned short countMission = 0;
+    const float rapportRem[MAX_RAPPORT] = {0, 1.0, 1.04, 1.055};
+    const char rapportMessage[MAX_RAPPORT][LIMIT_STRING] = {"", "Local non accessible", "Pas de signal dans le boitier general", "Recepteur defectueux"};
 
     while (on)
     {
         gets(input);
         if (strcmp(input, "exit") == 0)
-        {
+        {   
             on = 0;
         }
         else
@@ -273,6 +291,7 @@ int main()
                         mission[countMission].company = j;
                         mission[countMission].state = 0;
                         mission[countMission].subcontractingCount = 0;
+                        mission[countMission].idSubcontracting = -1;
                         countMission++;
                         printf("Mission publiee (%u)\n", countMission);
 
@@ -438,6 +457,7 @@ int main()
                             mission[countMission].company = j;
                             mission[countMission].state = 0;
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount + 1;
+                            mission[countMission].idSubcontracting = mission[k].id;
                             countMission++;
                             mission[k].state = 1;
                             printf("Sous-traitance enregistree (%u)\n", countMission);
@@ -451,7 +471,59 @@ int main()
                 unsigned char findMission = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
                 short currentID = (short)stringToFloat(currentMot.mot);
-                printf("WIP\n");
+                unsigned short k = 0;
+                for (; k < countMission; k++)
+                {
+                    if (mission[k].state == 1 && mission[k].id == currentID)
+                    {
+                        findMission++;
+                        k = countMission;
+                    }
+                }
+                if (!findMission)
+                {
+                    printf("Mission incorrect\n");
+                }
+                else
+                {
+                    currentMot = segmentation(currentMot.index, lenght, input);
+                    currentID = (short)stringToFloat(currentMot.mot);
+                    switch (currentID)
+                    {
+                        case 0:
+                            mission[k].state = 2;
+                            short id = mission[k].idSubcontracting;
+                            while(id > -1)
+                            {
+                                mission[id].state = 2;
+                                id = mission[id].idSubcontracting;
+                            }
+                            printf("Rapport enregistre\n");
+                            break;
+                         
+                        case 1:
+                        case 2:
+                        case 3:
+                            mission[countMission].id = countMission + 1;
+                            strcpy(mission[countMission].name, mission[k].name);
+                            mission[countMission].remuneration = arroundFloat(mission[k].remuneration * rapportRem[currentID]);
+                            mission[countMission].company = mission[k].company;
+                            mission[countMission].state = 0;
+                            mission[countMission].subcontractingCount = mission[k].subcontractingCount;
+                            mission[countMission].idSubcontracting = mission[k].id;
+                            countMission++;
+                            mission[k].state = 1;
+                            printf("Rapport enregistre (%u)\n", countMission);
+                            break;
+
+                        default:
+                            printf("Code de retour incorrect");
+                            break;
+                    }
+                    
+                }
+
+                
             }
 
             else
