@@ -134,6 +134,7 @@ typedef struct
     unsigned char state;
     unsigned char subcontractingCount;
     short idSubcontracting;
+    unsigned long rapport;
 } Mission;
 
 
@@ -171,17 +172,17 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
 
     if (input[0] == 'O' && input[1] == 'P')
     {
-        return 1;
+        return OP;
     }
 
     else if (input[0] == 'A' && input[1] == 'G')
     {
-        return 2;
+        return AG;
     }
 
     else if (input[0] == 'I' && input[1] == 'N')
     {
-        return 3;
+        return IN;
     }
     return 0;
 }
@@ -190,6 +191,16 @@ void showMission(Mission mission, char companyName[LIMIT_STRING_COMPANY])
 {
     printf("%u %s %s %.2f (%u)\n", mission.id, mission.name, companyName, mission.remuneration, mission.subcontractingCount);
     // company[mission[k].company].name
+}
+
+void showRapport(unsigned long rapport, const char rapportMessage[MAX_RAPPORT][LIMIT_STRING])
+{
+    while (rapport > 0)
+    {
+        rapport = rapport / 10;
+        printf("%s\n", rapportMessage[rapport % 10]);
+    }
+    
 }
 
 
@@ -299,6 +310,7 @@ int main()
                         mission[countMission].state = 0;
                         mission[countMission].subcontractingCount = 0;
                         mission[countMission].idSubcontracting = -1;
+                        mission[countMission].rapport = 0;
                         countMission++;
                         printf("Mission publiee (%u)\n", countMission);
 
@@ -337,6 +349,8 @@ int main()
                     if (!mission[k].state && mission[k].id == currentID)
                     {
                         showMission(mission[k], company[mission[k].company].name);
+                        printf("Rapport : %lu\n", mission[k].rapport);
+                        showRapport(mission[k].rapport, rapportMessage);
                         findMission++;
                         k = countMission;
                     }
@@ -465,6 +479,7 @@ int main()
                             mission[countMission].state = 0;
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount + 1;
                             mission[countMission].idSubcontracting = mission[k].id;
+                            mission[countCompany].rapport = mission[k].rapport;
                             countMission++;
                             mission[k].state = 1;
                             printf("Sous-traitance enregistree (%u)\n", countMission);
@@ -520,6 +535,7 @@ int main()
                             mission[countMission].state = 0;
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount;
                             mission[countMission].idSubcontracting = mission[k].id;
+                            mission[countCompany].rapport = mission[k].rapport*10 + currentID;
                             countMission++;
                             mission[k].state = 1;
                             printf("Rapport enregistre (%u)\n", countMission);
