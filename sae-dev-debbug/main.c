@@ -12,6 +12,13 @@ enum
     MAX_RAPPORT = 4,
 };
 
+enum
+{
+    OP = 1,
+    AG,
+    IN,
+};
+
 float stringToFloat(char input[LIMIT_STRING])
 {
     float result = 0;
@@ -197,7 +204,7 @@ int main()
 
     Mission mission[MAX_MISSION];
     unsigned short countMission = 0;
-    const float rapportRem[MAX_RAPPORT] = {0, 1.0, 1.04, 1.055};
+    const float rapportRem[MAX_RAPPORT] = {1.0, 1.0, 1.055, 1.04};
     const char rapportMessage[MAX_RAPPORT][LIMIT_STRING] = {"", "Local non accessible", "Pas de signal dans le boitier general", "Recepteur defectueux"};
 
     while (on)
@@ -255,10 +262,10 @@ int main()
                 unsigned char find = 0;
                 currentMot = segmentation(currentMot.index, lenght, input);
                 short currentID = (short)stringToFloat(currentMot.mot);
-                unsigned int j = 0;
+                unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
-                    if ((company[j].companyType == 1 || company[j].companyType == 2) && j + 1 == currentID)
+                    if (company[j].companyType == OP && j + 1 == currentID)
                     {
                         find = 1;
 
@@ -349,7 +356,7 @@ int main()
                 unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
-                    if ((company[j].companyType == 2 || company[j].companyType == 3) && j + 1 == currentID)
+                    if ((company[j].companyType == AG || company[j].companyType == IN) && j + 1 == currentID)
                     {
                         find = 1;
 
@@ -396,7 +403,7 @@ int main()
                 unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
-                    if (company[j].companyType == 2 && j + 1 == currentID)
+                    if (company[j].companyType == AG && j + 1 == currentID)
                     {
                         find = 1;
 
