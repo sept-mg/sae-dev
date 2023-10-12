@@ -193,12 +193,27 @@ void showMission(Mission mission, char companyName[LIMIT_STRING_COMPANY])
     // company[mission[k].company].name
 }
 
-void showRapport(unsigned long rapport, const char rapportMessage[MAX_RAPPORT][LIMIT_STRING])
+void showRapport(unsigned long rapport)
 {
     while (rapport > 0)
     {
+        switch (rapport % 10)
+        {
+            case 1:
+                printf("Local non accessible\n");
+                break;
+        
+            case 2:
+                printf("Pas de signal dans le boitier general\n");
+                break;
+
+            case 3:
+                printf("Recepteur defectueux\n");
+                break;
+            default:
+                break;
+        }
         rapport = rapport / 10;
-        printf("%s\n", rapportMessage[rapport % 10]);
     }
     
 }
@@ -216,8 +231,7 @@ int main()
     Mission mission[MAX_MISSION];
     unsigned short countMission = 0;
     const float rapportRem[MAX_RAPPORT] = {1.0, 1.0, 1.055, 1.04};
-    const char rapportMessage[MAX_RAPPORT][LIMIT_STRING] = {"", "Local non accessible", "Pas de signal dans le boitier general", "Recepteur defectueux"};
-
+    
     while (on)
     {
         gets(input);
@@ -349,8 +363,7 @@ int main()
                     if (!mission[k].state && mission[k].id == currentID)
                     {
                         showMission(mission[k], company[mission[k].company].name);
-                        printf("Rapport : %lu\n", mission[k].rapport);
-                        showRapport(mission[k].rapport, rapportMessage);
+                        showRapport(mission[k].rapport);
                         findMission++;
                         k = countMission;
                     }
@@ -535,7 +548,7 @@ int main()
                             mission[countMission].state = 0;
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount;
                             mission[countMission].idSubcontracting = mission[k].id;
-                            mission[countCompany].rapport = mission[k].rapport*10 + currentID;
+                            mission[countMission].rapport = mission[k].rapport*10 + currentID;
                             countMission++;
                             mission[k].state = 1;
                             printf("Rapport enregistre (%u)\n", countMission);
