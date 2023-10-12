@@ -472,12 +472,13 @@ int main()
                 currentMot = segmentation(currentMot.index, lenght, input);
                 short currentID = (short)stringToFloat(currentMot.mot);
                 unsigned short k = 0;
-                for (; k < countMission; k++)
+                for (unsigned short j = 0; j < countMission; j++)
                 {
-                    if (mission[k].state == 1 && mission[k].id == currentID)
+                    if (mission[j].state == 1 && mission[j].id == currentID)
                     {
+                        k = j;
+                        j = countMission;
                         findMission++;
-                        k = countMission;
                     }
                 }
                 if (!findMission)
@@ -506,6 +507,7 @@ int main()
                         case 3:
                             mission[countMission].id = countMission + 1;
                             strcpy(mission[countMission].name, mission[k].name);
+                            //printf(" mission k : %s\n", mission[k].name);
                             mission[countMission].remuneration = arroundFloat(mission[k].remuneration * rapportRem[currentID]);
                             mission[countMission].company = mission[k].company;
                             mission[countMission].state = 0;
