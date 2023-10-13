@@ -135,6 +135,7 @@ typedef struct
     unsigned char subcontractingCount;
     short idSubcontracting;
     unsigned long rapport;
+    char acceptedBy;
 } Mission;
 
 
@@ -325,6 +326,7 @@ int main()
                         mission[countMission].subcontractingCount = 0;
                         mission[countMission].idSubcontracting = -1;
                         mission[countMission].rapport = 0;
+                        mission[countMission].acceptedBy = -1;
                         countMission++;
                         printf("Mission publiee (%u)\n", countMission);
 
@@ -338,7 +340,7 @@ int main()
 
             else if (strcmp(currentMot.mot, "consultation") == 0)
             {
-                unsigned char findMission = 0;
+                unsigned short findMission = 0;
                 for (unsigned short k = 0; k < countMission; k++)
                 {
                     if(!mission[k].state) 
@@ -403,11 +405,12 @@ int main()
                     unsigned char findMission = 0;
                     currentMot = segmentation(currentMot.index, lenght, input);
                     currentID = (short)stringToFloat(currentMot.mot);
-                    for (unsigned char k = 0; k < countMission; k++)
+                    for (unsigned short k = 0; k < countMission; k++)
                     {
                         if (!mission[k].state && mission[k].id == currentID)
                         {
                             mission[k].state = 1;
+                            mission[k].acceptedBy = j;
                             printf("Acceptation enregistree\n");
                             findMission++;
                             k = countMission;
@@ -493,6 +496,7 @@ int main()
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount + 1;
                             mission[countMission].idSubcontracting = mission[k].id;
                             mission[countCompany].rapport = mission[k].rapport;
+                            mission[countCompany].acceptedBy = -1;
                             countMission++;
                             mission[k].state = 1;
                             printf("Sous-traitance enregistree (%u)\n", countMission);
@@ -549,6 +553,7 @@ int main()
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount;
                             mission[countMission].idSubcontracting = mission[k].id;
                             mission[countMission].rapport = mission[k].rapport*10 + currentID;
+                            mission[countMission].acceptedBy = -1;
                             countMission++;
                             mission[k].state = 1;
                             printf("Rapport enregistre (%u)\n", countMission);
@@ -562,6 +567,42 @@ int main()
                 }
 
                 
+            }
+
+            else if (strcmp(currentMot.mot, "recapitulatif") == 0)
+            {
+                unsigned char find = 0;
+                currentMot = segmentation(currentMot.index, lenght, input);
+                short currentID = (short)stringToFloat(currentMot.mot);
+                unsigned short j = 0;
+                while (j < countCompany && !find)
+                {
+                    if (j + 1 == currentID)
+                    {
+                        find = 1;
+
+                    }
+                    else
+                    {
+                        j++;
+                    }
+
+                }
+                if (!find)
+                {
+                    printf("Entreprise incorrecte\n");
+                }
+                else
+                {
+                    for (unsigned short k = 0; k < countMission; k++)
+                    {
+                        if (mission[k].company + 1 == currentID)
+                        {
+                            showMission(mission[k], company[mission[k].company].name);
+
+                        }
+                    }
+                }
             }
 
             else
