@@ -494,9 +494,9 @@ int main()
                             mission[countMission].company = j;
                             mission[countMission].state = 0;
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount + 1;
-                            mission[countMission].idSubcontracting = mission[k].id;
-                            mission[countCompany].rapport = mission[k].rapport;
-                            mission[countCompany].acceptedBy = -1;
+                            mission[countMission].idSubcontracting = mission[k].id - 1;
+                            mission[countMission].rapport = mission[k].rapport;
+                            mission[countMission].acceptedBy = -1;
                             countMission++;
                             mission[k].state = 1;
                             printf("Sous-traitance enregistree (%u)\n", countMission);
@@ -546,12 +546,11 @@ int main()
                         case 3:
                             mission[countMission].id = countMission + 1;
                             strcpy(mission[countMission].name, mission[k].name);
-                            //printf(" mission k : %s\n", mission[k].name);
                             mission[countMission].remuneration = arroundFloat(mission[k].remuneration * rapportRem[currentID]);
                             mission[countMission].company = mission[k].company;
                             mission[countMission].state = 0;
                             mission[countMission].subcontractingCount = mission[k].subcontractingCount;
-                            mission[countMission].idSubcontracting = mission[k].id;
+                            mission[countMission].idSubcontracting = mission[k].id -1;
                             mission[countMission].rapport = mission[k].rapport*10 + currentID;
                             mission[countMission].acceptedBy = -1;
                             countMission++;
@@ -594,12 +593,114 @@ int main()
                 }
                 else
                 {
+                    short non_attribuees_len = -1, attribuees_len = -1, terminees_len = -1, a_realiser_len = -1, realisees_len = -1;
+                    short* non_attribuees = &non_attribuees_len;
+                    short* attribuees = &attribuees_len;
+                    short* terminees = &terminees_len;
+                    short* a_realiser = &a_realiser_len;
+                    short* realisees = &realisees_len;
+
                     for (unsigned short k = 0; k < countMission; k++)
                     {
                         if (mission[k].company + 1 == currentID)
                         {
-                            showMission(mission[k], company[mission[k].company].name);
+                            switch (mission[k].state)
+                            {
+                                case 0:
+                                    non_attribuees_len++;
+                                    non_attribuees++;
+                                    *non_attribuees = k;
+                                    break;
 
+                                case 1:
+                                    attribuees_len++;
+                                    attribuees++;
+                                    *attribuees = k;
+                                    break;
+                                
+                                case 2:
+                                    terminees_len++;
+                                    terminees++;
+                                    *terminees = k;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        else if(mission[k].acceptedBy == currentID - 1)
+                        {
+                            if (mission[k].state == 1)
+                            {
+                                a_realiser_len++;
+                                a_realiser++;
+                                *a_realiser = k;
+                            }
+                            else if (mission[k].state == 2)
+                            {
+                                realisees_len++;
+                                realisees++;
+                                *realisees = k;
+                            }
+                        }
+                    }
+                    
+                    if (non_attribuees_len > -1)
+                    {
+                        printf("* non attribuees\n");
+                        non_attribuees -= non_attribuees_len;
+                        for (short i = 0; i <= non_attribuees_len; i++)
+                        {
+                            printf("  ");
+                            showMission(mission[*non_attribuees], company[mission[*non_attribuees].company].name);
+                            non_attribuees++;
+                        }
+                    }
+
+                    if (attribuees_len > -1)
+                    {
+                        printf("* attribuees\n");
+                        attribuees -= attribuees_len;
+                        for (short i = 0; i <= attribuees_len; i++)
+                        {
+                            printf("  ");
+                            showMission(mission[*attribuees], company[mission[*attribuees].company].name);
+                            attribuees++;
+                        }
+                    }
+
+                    if (terminees_len > -1)
+                    {
+                        printf("* terminees\n");
+                        terminees -= terminees_len;
+                        for (short i = 0; i <= terminees_len; i++)
+                        {
+                            printf("  ");
+                            showMission(mission[*terminees], company[mission[*terminees].company].name);
+                            terminees++;
+                        }
+                    }
+
+                    if (a_realiser_len > -1)
+                    {
+                        printf("* a realiser\n");
+                        a_realiser -= a_realiser_len;
+                        for (short i = 0; i <= a_realiser_len; i++)
+                        {
+                            printf("  ");
+                            showMission(mission[*a_realiser], company[mission[*a_realiser].company].name);
+                            a_realiser++;
+                        }
+                    }
+
+                    if (realisees_len > -1)
+                    {
+                        printf("* realisees\n");
+                        realisees -= realisees_len;
+                        for (short i = 0; i <= realisees_len; i++)
+                        {
+                            printf("  ");
+                            showMission(mission[*realisees], company[mission[*realisees].company].name);
+                            realisees++;
                         }
                     }
                 }
