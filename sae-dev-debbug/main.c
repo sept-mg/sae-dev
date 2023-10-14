@@ -554,7 +554,7 @@ int main()
                             mission[countMission].rapport = mission[k].rapport*10 + currentID;
                             mission[countMission].acceptedBy = -1;
                             countMission++;
-                            mission[k].state = 1;
+                            mission[k].state = 2;
                             printf("Rapport enregistre (%u)\n", countMission);
                             break;
 
