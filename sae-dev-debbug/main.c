@@ -235,7 +235,7 @@ int main()
     
     while (on)
     {
-        gets(input);
+        scanf("%s", &input);
         if (strcmp(input, "exit") == 0)
         {   
             on = 0;
@@ -247,18 +247,19 @@ int main()
             lenght = strlen(input);
             currentMot = segmentation(currentMot.index, lenght, input);
 
-            if (strcmp(currentMot.mot, "inscription") == 0)
+            if (strcmp(input, "inscription") == 0)
             {
-                currentMot = segmentation(currentMot.index, lenght, input);
-                unsigned char currentCompanyType = (getInscriptionCompanyType(currentMot.mot));
+                scanf("%s", &input);
+                unsigned char currentCompanyType = (getInscriptionCompanyType(input));
+                
                 if (currentCompanyType)
                 {
                     unsigned char exist = 0;
-                    currentMot = segmentation(currentMot.index, lenght, input);
+                    scanf("%s", &input);
 
                     for (unsigned short k = 0; k < countCompany; k++)
                     {
-                        if (strcmp(company[k].name, currentMot.mot) == 0)
+                        if (strcmp(company[k].name, input) == 0)
                         {
                             exist = 1;
                             k = countCompany;
@@ -267,7 +268,7 @@ int main()
                     }
                     if (!exist)
                     {
-                        strcpy(company[countCompany].name, currentMot.mot);
+                        strcpy(company[countCompany].name, input);
                         company[countCompany].companyType = currentCompanyType;
                         countCompany++;
                         printf("Inscription realisee (%u)\n", countCompany);
@@ -283,11 +284,11 @@ int main()
                 }
             }
 
-            else if (strcmp(currentMot.mot, "mission") == 0)
+            else if (strcmp(input, "mission") == 0)
             {
                 unsigned char find = 0;
-                currentMot = segmentation(currentMot.index, lenght, input);
-                short currentID = (short)stringToFloat(currentMot.mot);
+                short currentID;
+                scanf("%hu", &currentID);
                 unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
@@ -305,12 +306,10 @@ int main()
 
                 if (find)
                 {
-                    currentMot = segmentation(currentMot.index, lenght, input);
-                    char currentName[LIMIT_STRING_MISSION];
-                    strcpy(currentName, currentMot.mot);
+                    scanf("%s", &input);
 
-                    currentMot = segmentation(currentMot.index, lenght, input);
-                    float currentRemuneration = stringToFloat(currentMot.mot);
+                    float currentRemuneration;
+                    scanf("%f", &currentRemuneration);
                     if (currentRemuneration <= 0)
                     {
                         printf("Remuneration incorrecte\n");
@@ -319,7 +318,7 @@ int main()
                     {
                         
                         mission[countMission].id = countMission+1;
-                        strcpy(mission[countMission].name, currentName);
+                        strcpy(mission[countMission].name, input);
                         mission[countMission].remuneration = currentRemuneration;
                         mission[countMission].company = j;
                         mission[countMission].state = 0;
@@ -338,7 +337,7 @@ int main()
                 }
             }
 
-            else if (strcmp(currentMot.mot, "consultation") == 0)
+            else if (strcmp(input, "consultation") == 0)
             {
                 unsigned short findMission = 0;
                 for (unsigned short k = 0; k < countMission; k++)
@@ -355,11 +354,11 @@ int main()
                 }
             }
 
-            else if (strcmp(currentMot.mot, "detail") == 0)
+            else if (strcmp(input, "detail") == 0)
             {
                 unsigned char findMission = 0;
-                currentMot = segmentation(currentMot.index, lenght, input);
-                short currentID = (short)stringToFloat(currentMot.mot);
+                short currentID;
+                scanf("%hu", &currentID);
                 for (unsigned short k = 0; k < countMission; k++)
                 {
                     if (!mission[k].state && mission[k].id == currentID)
@@ -377,11 +376,11 @@ int main()
 
             }
 
-            else if (strcmp(currentMot.mot, "acceptation") == 0)
+            else if (strcmp(input, "acceptation") == 0)
             {
                 unsigned char find = 0;
-                currentMot = segmentation(currentMot.index, lenght, input);
-                short currentID = (short)stringToFloat(currentMot.mot);
+                short currentID;
+                scanf("%hu", &currentID);
                 unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
@@ -403,8 +402,7 @@ int main()
                 else
                 {
                     unsigned char findMission = 0;
-                    currentMot = segmentation(currentMot.index, lenght, input);
-                    currentID = (short)stringToFloat(currentMot.mot);
+                    scanf("%hu", &currentID);
                     for (unsigned short k = 0; k < countMission; k++)
                     {
                         if (!mission[k].state && mission[k].id == currentID)
@@ -425,11 +423,11 @@ int main()
 
             }
 
-            else if (strcmp(currentMot.mot, "sous-traitance") == 0)
+            else if (strcmp(input, "sous-traitance") == 0)
             {
                 unsigned char find = 0;
-                currentMot = segmentation(currentMot.index, lenght, input);
-                short currentID = (short)stringToFloat(currentMot.mot);
+                short currentID;
+                scanf("%hu", &currentID);
                 unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
@@ -451,8 +449,7 @@ int main()
                 else
                 {
                     unsigned char findMission = 0;
-                    currentMot = segmentation(currentMot.index, lenght, input);
-                    currentID = (short)stringToFloat(currentMot.mot);
+                    scanf("%hu", &currentID);
                     unsigned short k = 0;
                     while (k < countMission && !findMission)
                     {
@@ -480,8 +477,8 @@ int main()
                     }
                     else
                     {
-                        currentMot = segmentation(currentMot.index, lenght, input);
-                        float currentRemuneration = stringToFloat(currentMot.mot);
+                        float currentRemuneration;
+                        scanf("%f", &currentRemuneration);
                         if (currentRemuneration <= 0)
                         {
                             printf("Remuneration incorrecte\n");
@@ -505,11 +502,11 @@ int main()
                 }
             }
 
-            else if (strcmp(currentMot.mot, "rapport") == 0)
+            else if (strcmp(input, "rapport") == 0)
             {
                 unsigned char findMission = 0;
-                currentMot = segmentation(currentMot.index, lenght, input);
-                short currentID = (short)stringToFloat(currentMot.mot);
+                short currentID;
+                scanf("%hu", &currentID);
                 unsigned short k = 0;
                 for (unsigned short j = 0; j < countMission; j++)
                 {
@@ -526,8 +523,7 @@ int main()
                 }
                 else
                 {
-                    currentMot = segmentation(currentMot.index, lenght, input);
-                    currentID = (short)stringToFloat(currentMot.mot);
+                    scanf("%hu", &currentID);
                     switch (currentID)
                     {
                         case 0:
@@ -568,11 +564,11 @@ int main()
                 
             }
 
-            else if (strcmp(currentMot.mot, "recapitulatif") == 0)
+            else if (strcmp(input, "recapitulatif") == 0)
             {
                 unsigned char find = 0;
-                currentMot = segmentation(currentMot.index, lenght, input);
-                short currentID = (short)stringToFloat(currentMot.mot);
+                short currentID;
+                scanf("%hu", &currentID);
                 unsigned short j = 0;
                 while (j < countCompany && !find)
                 {
@@ -594,11 +590,11 @@ int main()
                 else
                 {
                     short non_attribuees_len = -1, attribuees_len = -1, terminees_len = -1, a_realiser_len = -1, realisees_len = -1;
-                    short* non_attribuees = &non_attribuees_len;
-                    short* attribuees = &attribuees_len;
-                    short* terminees = &terminees_len;
-                    short* a_realiser = &a_realiser_len;
-                    short* realisees = &realisees_len;
+                    short non_attribuees[MAX_MISSION];
+                    short attribuees[MAX_MISSION];
+                    short terminees[MAX_MISSION];
+                    short a_realiser[MAX_MISSION];
+                    short realisees[MAX_MISSION];
 
                     for (unsigned short k = 0; k < countMission; k++)
                     {
@@ -608,20 +604,17 @@ int main()
                             {
                                 case 0:
                                     non_attribuees_len++;
-                                    non_attribuees++;
-                                    *non_attribuees = k;
+                                    non_attribuees[non_attribuees_len] = k;
                                     break;
 
                                 case 1:
                                     attribuees_len++;
-                                    attribuees++;
-                                    *attribuees = k;
+                                    attribuees[attribuees_len] = k;
                                     break;
                                 
                                 case 2:
                                     terminees_len++;
-                                    terminees++;
-                                    *terminees = k;
+                                    terminees[terminees_len] = k;
                                     break;
                                 default:
                                     break;
@@ -632,14 +625,12 @@ int main()
                             if (mission[k].state == 1)
                             {
                                 a_realiser_len++;
-                                a_realiser++;
-                                *a_realiser = k;
+                                a_realiser[a_realiser_len] = k;
                             }
                             else if (mission[k].state == 2)
                             {
                                 realisees_len++;
-                                realisees++;
-                                *realisees = k;
+                                realisees[realisees_len] = k;
                             }
                         }
                     }
@@ -647,68 +638,53 @@ int main()
                     if (non_attribuees_len > -1)
                     {
                         printf("* non attribuees\n");
-                        non_attribuees -= non_attribuees_len;
                         for (short i = 0; i <= non_attribuees_len; i++)
                         {
                             printf("  ");
-                            showMission(mission[*non_attribuees], company[mission[*non_attribuees].company].name);
-                            non_attribuees++;
+                            showMission(mission[non_attribuees[i]], company[mission[non_attribuees[i]].company].name);
                         }
                     }
 
                     if (attribuees_len > -1)
                     {
                         printf("* attribuees\n");
-                        attribuees -= attribuees_len;
                         for (short i = 0; i <= attribuees_len; i++)
                         {
                             printf("  ");
-                            showMission(mission[*attribuees], company[mission[*attribuees].company].name);
-                            attribuees++;
+                            showMission(mission[attribuees[i]], company[mission[attribuees[i]].company].name);
                         }
                     }
 
                     if (terminees_len > -1)
                     {
                         printf("* terminees\n");
-                        terminees -= terminees_len;
                         for (short i = 0; i <= terminees_len; i++)
                         {
                             printf("  ");
-                            showMission(mission[*terminees], company[mission[*terminees].company].name);
-                            terminees++;
+                            showMission(mission[terminees[i]], company[mission[terminees[i]].company].name);
                         }
                     }
 
                     if (a_realiser_len > -1)
                     {
                         printf("* a realiser\n");
-                        a_realiser -= a_realiser_len;
                         for (short i = 0; i <= a_realiser_len; i++)
                         {
                             printf("  ");
-                            showMission(mission[*a_realiser], company[mission[*a_realiser].company].name);
-                            a_realiser++;
+                            showMission(mission[a_realiser[i]], company[mission[a_realiser[i]].company].name);
                         }
                     }
 
                     if (realisees_len > -1)
                     {
                         printf("* realisees\n");
-                        realisees -= realisees_len;
                         for (short i = 0; i <= realisees_len; i++)
                         {
                             printf("  ");
-                            showMission(mission[*realisees], company[mission[*realisees].company].name);
-                            realisees++;
+                            showMission(mission[realisees[i]], company[mission[realisees[i]].company].name);
                         }
                     }
                 }
-            }
-
-            else
-            {
-                printf("Commande incorrect\n");
             }
 
         }
