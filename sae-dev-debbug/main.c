@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #pragma warning(disable: 4996)
+#pragma warning(disable: 4996)
 
 enum
 {
@@ -18,91 +19,6 @@ enum
     AG,
     IN,
 };
-
-float stringToFloat(char input[LIMIT_STRING])
-{
-    float result = 0;
-    unsigned int shift = 1;
-    int lenght = strlen(input);
-    char signe = (input[0] == '-') ? -1 : 1;
-    int i = (input[0] == '-' || input[0] == '+') ? 1 : 0;
-
-
-    for (; i < lenght; i++)
-    {
-        switch (input[i])
-        {
-        case '0':
-            result = result * 10;
-            break;
-
-        case '1':
-            result = result * 10 + 1;
-            break;
-
-        case '2':
-            result = result * 10 + 2;
-            break;
-
-        case '3':
-            result = result * 10 + 3;
-            break;
-
-        case '4':
-            result = result * 10 + 4;
-            break;
-
-        case '5':
-            result = result * 10 + 5;
-            break;
-
-        case '6':
-            result = result * 10 + 6;
-            break;
-
-        case '7':
-            result = result * 10 + 7;
-            break;
-
-        case '8':
-            result = result * 10 + 8;
-            break;
-
-        case '9':
-            result = result * 10 + 9;
-            break;
-
-        case '.':
-            for (int k = 0; k < lenght - i - 1; k++)
-            {
-                shift *= 10;
-            }
-
-            break;
-
-        default:
-            i = lenght * 2;
-            break;
-        }
-    }
-
-    if (i == lenght * 2)
-    {
-        return 0;
-    }
-
-    int temp = result / shift * signe * 1000;
-    if (temp % 10 > 4)
-    {
-        temp = temp / 10 + 1;
-    }
-    else
-    {
-        temp = temp / 10;
-    }
-
-    return (float) temp / 100;
-}
 
 float arroundFloat(float input)
 {
@@ -137,31 +53,6 @@ typedef struct
     unsigned long rapport;
     char acceptedBy;
 } Mission;
-
-
-typedef struct
-{
-    char mot[LIMIT_STRING_COMPANY];
-    unsigned short index;
-} mot;
-
-mot segmentation(unsigned short i, unsigned short limit, char input[LIMIT_STRING])
-{
-    mot result;
-    char currentChar[LIMIT_STRING_COMPANY] = "";
-    unsigned short j = 0;
-
-    while (input[i] != ' ' && i < limit && input[i] != '\0')
-    {
-        currentChar[j] = input[i];
-        i++;
-        j++;
-    }
-    currentChar[j] = '\0';
-    strcpy(result.mot, currentChar);
-    result.index = i + 1;
-    return result;
-}
 
 unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY])
 {
@@ -224,14 +115,13 @@ int main()
 {
     char on = 1;
     char input[LIMIT_STRING] = "";
-    unsigned char lenght = 0;
 
     Company company[MAX_COMPANY];
     unsigned char countCompany = 0;
 
     Mission mission[MAX_MISSION];
     unsigned short countMission = 0;
-    const float rapportRem[MAX_RAPPORT] = {1.0, 1.0, 1.055, 1.04};
+    const float rapportRem[MAX_RAPPORT] = {1.0f, 1.0f, 1.055f, 1.04f};
     
     while (on)
     {
@@ -242,10 +132,6 @@ int main()
         }
         else
         {
-            mot currentMot;
-            currentMot.index = 0;
-            lenght = strlen(input);
-            currentMot = segmentation(currentMot.index, lenght, input);
 
             if (strcmp(input, "inscription") == 0)
             {
