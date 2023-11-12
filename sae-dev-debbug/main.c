@@ -551,7 +551,6 @@ int main()
         if (strcmp(input, "inscription") == 0) //débute le processus d'inscription d'une entreprise
         {
             inscription(missions, countMission, company, countCompany);
-                
         }
 
         //ajout d'une mission
