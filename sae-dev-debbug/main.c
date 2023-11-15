@@ -168,7 +168,6 @@ Boolean existCompanyByName(char input[LIMIT_STRING], Companies *cp)
     return exist;
 }
 
-
 void makeMission(Missions *m, char name[LIMIT_STRING_MISSION], float remuneration, unsigned short companyIndex ,unsigned char subcontractingCount, short idSubcontracting, unsigned long rapport)
 {
     strcpy(m->missions[m->countMission].name, name);
