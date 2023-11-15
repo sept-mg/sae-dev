@@ -12,6 +12,9 @@ enum //énumération des limites des chaines de caractères et du maximum d'entrepr
     MAX_RAPPORT = 4,            //nombre maximal de rapport de mission (pour une seule mission)
     MAX_SUBCONTRACT = 5,        //nombre maximal de sous contrat
     MAX_RECAP_TITLE = 20,       //limite de taille d'un type de dans récapitulatif
+    UNDEF_ACCEPTED_BY = -1,     //quand une mission n'est pas accepter par une entreprise
+    UNDEF_ID_SUBTRACT = -1,     //quand une mission n'a pas été sous traité par aucune entreprise
+    DEFAULT_SUBSTRACT_COUNT = 0,//début du compte de sous traitance
 };
 
 typedef enum //type d'entreprises
@@ -36,20 +39,6 @@ enum //type de rapport
     PSBG, //Pas de signal dans le boitier general
     RD, //Recepteur defectueux
 };
-
-float arroundFloat(float input) //fonction d'arrondi au centième près
-{
-    int temp = input * 1000;
-    if (temp % 10 > 4)
-    {
-        temp = temp / 10 + 1;
-    }
-    else
-    {
-        temp = temp / 10;
-    }
-    return (float)temp / 100;
-}
 
 typedef struct //structure contenant le nom d'une entreprise et son type (OP,AG,IN)
 {
@@ -94,6 +83,20 @@ typedef enum
     FALSE = 0,
     TRUE = 0,
 } Boolean;
+
+float arroundFloat(float input) //fonction d'arrondi au centième près
+{
+    int temp = input * 1000;
+    if (temp % 10 > 4)
+    {
+        temp = temp / 10 + 1;
+    }
+    else
+    {
+        temp = temp / 10;
+    }
+    return (float)temp / 100;
+}
 
 unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY]) //fonction d'inscription du type d'entreprise
 {
@@ -166,16 +169,16 @@ Boolean existCompanyByName(char input[LIMIT_STRING], Companies *cp)
 }
 
 
-void makeMission(Missions *m, char name[LIMIT_STRING_MISSION], float remuneration, unsigned short companyIndex, MissionState state ,unsigned char subcontractingCount, short idSubcontracting, unsigned long rapport, char acceptedBy)
+void makeMission(Missions *m, char name[LIMIT_STRING_MISSION], float remuneration, unsigned short companyIndex ,unsigned char subcontractingCount, short idSubcontracting, unsigned long rapport)
 {
     strcpy(m->missions[m->countMission].name, name);
     m->missions[m->countMission].remuneration = remuneration;
     m->missions[m->countMission].company = companyIndex;
-    m->missions[m->countMission].state = state;
+    m->missions[m->countMission].state = NATT;
     m->missions[m->countMission].subcontractingCount = subcontractingCount;
     m->missions[m->countMission].idSubcontracting = idSubcontracting;
     m->missions[m->countMission].rapport = rapport;
-    m->missions[m->countMission].acceptedBy = acceptedBy;
+    m->missions[m->countMission].acceptedBy = UNDEF_ACCEPTED_BY;
     (m->countMission)++;
 }
 
@@ -241,8 +244,8 @@ void mission(Missions *m, Companies *cp)
         }
         else
         {
-            //on intègre les paramètres de la mission a la structure "Mission"
-            makeMission(m, input, currentRemuneration, currentID, NATT, 0, -1, SUCCESS, -1); //success car par défaut mais la mission n'est pas réalisé
+            //on intègre les paramètres de la mission a la structure "Mission
+            makeMission(m, input, currentRemuneration, currentID, DEFAULT_SUBSTRACT_COUNT, UNDEF_ID_SUBTRACT, SUCCESS); //success car par défaut mais la mission n'est pas réalisé
             printf("Mission publiee (%u)\n", m->countMission);
 
         }
@@ -360,7 +363,7 @@ void sousTraitance(Missions *m, Companies *cp)
             else
             {
                 //mise en place d'une nouvelle mission
-                makeMission(m, m->missions[currentID].name, currentRemuneration, j, NATT, m->missions[currentID].subcontractingCount + 1, currentID, m->missions[currentID].rapport, -1);
+                makeMission(m, m->missions[currentID].name, currentRemuneration, j, m->missions[currentID].subcontractingCount + 1, currentID, m->missions[currentID].rapport);
                 m->missions[currentID].state = ATT;
                 printf("Sous-traitance enregistree (%u)\n", m->countMission);
             }
@@ -401,7 +404,7 @@ void rapport(const float rapportRem[MAX_RAPPORT], Missions *m)
         case LNA:
         case PSBG:
         case RD: //si la mission a pour code de retour autre que succès:
-            makeMission(m, m->missions[k].name, arroundFloat(m->missions[k].remuneration * rapportRem[currentID]), m->missions[k].company, NATT, m->missions[k].subcontractingCount, k, m->missions[k].rapport * 10 + currentID, -1);
+            makeMission(m, m->missions[k].name, arroundFloat(m->missions[k].remuneration * rapportRem[currentID]), m->missions[k].company, m->missions[k].subcontractingCount, k, m->missions[k].rapport * 10 + currentID);
             m->missions[k].state = TER;
             printf("Rapport enregistre (%u)\n", m->countMission);
             break;
