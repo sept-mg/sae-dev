@@ -195,7 +195,7 @@ Boolean findCompany(Companies* cp, unsigned short* companyIndex, CompanyType typ
     return (*companyIndex < cp->countCompany && cp->companies[*companyIndex].companyType != 0 && ((type[0] == type[1] && type[0] == 0) || cp->companies[*companyIndex].companyType == type[0] || cp->companies[*companyIndex].companyType == type[1]));
 }
 
-Boolean failedCompany(Mission *m, unsigned short* companyIndex)
+Boolean failedCompany(Mission* m, unsigned short* companyIndex)
 {
     for (unsigned i = 0; i < m->failedByIdCount; i++)
     {
@@ -203,7 +203,7 @@ Boolean failedCompany(Mission *m, unsigned short* companyIndex)
         {
             return TRUE;
         }
-            
+
     }
     return FALSE;
 
@@ -336,7 +336,7 @@ void acceptation(Missions* m, Companies* cp)
             printf("Mission incorrecte\n");
         }
 
-        else if(failedCompany(&(m->missions[currentID]), j))
+        else if (failedCompany(&(m->missions[currentID]), j))
         {
             printf("Entreprise incorrecte\n");
         }
