@@ -1,40 +1,43 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <string.h>
 #pragma warning(disable: 4996)
 
-enum //énumération des limites des chaines de caractères et du maximum d'entreprise de missions et de rapports
+enum //Ã©numÃ©ration des limites des chaines de caractÃ©res et du maximum d'entreprise de missions et de rapports
 {
     LIMIT_STRING_COMPANY = 31,  //limite de taille du nom d'une entreprise
     LIMIT_STRING_MISSION = 31,  //limite de taille de nom d'une mission
-    LIMIT_STRING = 100,         //limite de taille d'une chaine de caractère en général
+    LIMIT_STRING = 100,         //limite de taille d'une chaine de caractÃ©re en gÃ©nÃ©ral
     MAX_COMPANY = 50,           //nombre maximal d'entreprise
     MAX_MISSION = 500,          //nombre maximal de missions
     MAX_RAPPORT = 4,            //nombre maximal de rapport de mission (pour une seule mission)
     MAX_SUBCONTRACT = 5,        //nombre maximal de sous contrat
-    MAX_RECAP_TITLE = 20,       //limite de taille d'un type de dans récapitulatif
+    MAX_RECAP_TITLE = 20,       //limite de taille d'un type de dans rÃ©capitulatif
     UNDEF_ACCEPTED_BY = -1,     //quand une mission n'est pas accepter par une entreprise
-    UNDEF_ID_SUBTRACT = -1,     //quand une mission n'a pas été sous traité par aucune entreprise
-    DEFAULT_SUBSTRACT_COUNT = 0,//début du compte de sous traitance
+    UNDEF_ID_SUBTRACT = -1,     //quand une mission n'a pas Ã©tÃ© sous traitÃ© par aucune entreprise
+    DEFAULT_SUBSTRACT_COUNT = 0,//dÃ©but du compte de sous traitance
+    UNDEF_ID_FAILED = -1,       //quand une mission n'a pas Ã©tÃ© Ã©chouÃ© par une entreprise
+    INIT_ID_FAILED = -2,        //quand la mission viens d'etre initiÃ© et que donc le domaine des mission n'est pas encore bon
+
 };
 
 typedef enum //type d'entreprises
 {
-    ND = 0, //non définie ou pas important
-    OP = 1, //opérateur
+    ND = 0, //non dÃ©finie ou pas important
+    OP = 1, //opÃ©rateur
     AG,     //agence
     IN,     //intervenant
 } CompanyType;
 
 typedef enum //type de missions
 {
-    NATT = 0, //non attribuées
-    ATT, // attribuées
-    TER, // terminées
+    NATT = 0, //non attribuÃ©es
+    ATT, // attribuÃ©es
+    TER, // terminÃ©es
 } MissionState;
 
 enum //type de rapport
 {
-    SUCCESS = 0, //par défaut donc si la mission passe en terminé elle passe en SUCCESS par défaut
+    SUCCESS = 0, //par dÃ©faut donc si la mission passe en terminÃ© elle passe en SUCCESS par dÃ©faut
     LNA, //Local non accessible 
     PSBG, //Pas de signal dans le boitier general
     RD, //Recepteur defectueux
@@ -57,12 +60,14 @@ typedef struct //structure contenant toutes les informations sur
 {
     char name[LIMIT_STRING_MISSION];    //taille max du nom de la mission
     unsigned short company;             //l'entreprise qui a mis la mission en ligne
-    float remuneration;                 //rémunération de la mission
-    MissionState state;                 //état de la mission (attribuée non attribuée etc...)
-    unsigned char subcontractingCount;  //nombre de fois que la mission a étée soustraitée
+    float remuneration;                 //rÃ©munÃ©ration de la mission
+    MissionState state;                 //Ã©tat de la mission (attribuÃ©e non attribuÃ©e etc...)
+    unsigned char subcontractingCount;  //nombre de fois que la mission a Ã©tÃ©e soustraitÃ©e
     short idSubcontracting;             //ID de la mission lors de sa sous traitance
-    unsigned long rapport;              //ce qu'il s'est passé lors de la mission (code 0 1 2 3)
-    char acceptedBy;                    //ID de l'entreprise qui a accepté la mission
+    unsigned long rapport;              //ce qu'il s'est passÃ© lors de la mission (code 0 1 2 3)
+    char acceptedBy;                    //ID de l'entreprise qui a acceptÃ© la mission
+    unsigned short failedById[MAX_COMPANY];          //toutes les company qui ont ratÃ© la mission
+    unsigned short failedByIdCount;
 } Mission;
 
 typedef struct
@@ -81,22 +86,9 @@ typedef struct //structur de chaque type de de mission a mettre dans la commande
 typedef enum
 {
     FALSE = 0,
-    TRUE = 0,
+    TRUE = 1,
 } Boolean;
 
-float arroundFloat(float input) //fonction d'arrondi au centième près
-{
-    int temp = input * 1000;
-    if (temp % 10 > 4)
-    {
-        temp = temp / 10 + 1;
-    }
-    else
-    {
-        temp = temp / 10;
-    }
-    return (float)temp / 100;
-}
 
 unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY]) //fonction d'inscription du type d'entreprise
 {
@@ -105,7 +97,7 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY]) //fonc
         return ND;
     }
 
-    if (input[0] == 'O' && input[1] == 'P') //OP (opérateur)
+    if (input[0] == 'O' && input[1] == 'P') //OP (opÃ©rateur)
     {
         return OP;
     }
@@ -122,12 +114,12 @@ unsigned char getInscriptionCompanyType(char input[LIMIT_STRING_COMPANY]) //fonc
     return ND;
 }
 
-void showMission(unsigned short *id, Mission *mission, char companyName[LIMIT_STRING_COMPANY]) //affiche une mission
+void showMission(unsigned short* id, Mission* mission, char companyName[LIMIT_STRING_COMPANY]) //affiche une mission
 {
     printf("%u %s %s %.2f (%u)\n", *id + 1, mission->name, companyName, mission->remuneration, mission->subcontractingCount);
 }
 
-void showRapport(unsigned long rapport) //affiche le type de problèmes qui ont eus lieu pendant la mission grace au code de retour
+void showRapport(unsigned long rapport) //affiche le type de problÃ©mes qui ont eus lieu pendant la mission grace au code de retour
 {
     while (rapport > 0)
     {
@@ -152,12 +144,12 @@ void showRapport(unsigned long rapport) //affiche le type de problèmes qui ont e
 
 }
 
-Boolean existCompanyByName(char input[LIMIT_STRING], Companies *cp)
+Boolean existCompanyByName(char input[LIMIT_STRING], Companies* cp)
 {
     Boolean exist = FALSE;
     for (unsigned short k = 0; k < cp->countCompany; k++)
     {
-        if (strcmp(cp->companies[k].name, input) == 0) //vérifie si l'entreprise existe déja
+        if (strcmp(cp->companies[k].name, input) == 0) //vÃ©rifie si l'entreprise existe dÃ©ja
         {
             exist = TRUE;
             k = cp->countCompany;
@@ -168,7 +160,7 @@ Boolean existCompanyByName(char input[LIMIT_STRING], Companies *cp)
     return exist;
 }
 
-void makeMission(Missions *m, char name[LIMIT_STRING_MISSION], float remuneration, unsigned short companyIndex ,unsigned char subcontractingCount, short idSubcontracting, unsigned long rapport)
+void makeMission(Missions* m, char name[LIMIT_STRING_MISSION], float remuneration, unsigned short companyIndex, unsigned char subcontractingCount, short idSubcontracting, unsigned long rapport, short idFailed)
 {
     strcpy(m->missions[m->countMission].name, name);
     m->missions[m->countMission].remuneration = remuneration;
@@ -178,21 +170,51 @@ void makeMission(Missions *m, char name[LIMIT_STRING_MISSION], float remuneratio
     m->missions[m->countMission].idSubcontracting = idSubcontracting;
     m->missions[m->countMission].rapport = rapport;
     m->missions[m->countMission].acceptedBy = UNDEF_ACCEPTED_BY;
+
+    if (idFailed == INIT_ID_FAILED)
+    {
+        m->missions[m->countMission].failedByIdCount = 0;
+    }
+    else if (idFailed > UNDEF_ID_FAILED)
+    {
+        for (unsigned short i = 0; i < m->missions[idFailed].failedByIdCount; i++)
+        {
+            m->missions[m->countMission].failedById[i] = m->missions[idFailed].failedById[i];
+        }
+
+        m->missions[m->countMission].failedById[m->missions[idFailed].failedByIdCount] = m->missions[idFailed].acceptedBy;
+        m->missions[m->countMission].failedByIdCount = m->missions[idFailed].failedByIdCount + 1;
+    }
+
     (m->countMission)++;
 }
 
-Boolean findCompany(Companies *cp, unsigned short *companyIndex, CompanyType type[2])
+Boolean findCompany(Companies* cp, unsigned short* companyIndex, CompanyType type[2])
 {
-                                                                                                    //pas de type interressant
+    //pas de type interressant
     return (*companyIndex < cp->countCompany && cp->companies[*companyIndex].companyType != 0 && ((type[0] == type[1] && type[0] == 0) || cp->companies[*companyIndex].companyType == type[0] || cp->companies[*companyIndex].companyType == type[1]));
 }
 
-Boolean findMissions(Missions *m, unsigned short* indexMission, MissionState state)
+Boolean failedCompany(Mission *m, unsigned short* companyIndex)
+{
+    for (unsigned i = 0; i < m->failedByIdCount; i++)
+    {
+        if (m->failedById[i] == companyIndex)
+        {
+            return TRUE;
+        }
+            
+    }
+    return FALSE;
+
+}
+
+Boolean findMissions(Missions* m, unsigned short* indexMission, MissionState state)
 {
     return (*indexMission < m->countMission && m->missions[*indexMission].state == state);
 }
 
-void inscription (Companies *cp)
+void inscription(Companies* cp)
 {
     char input[LIMIT_STRING];
     scanf("%s", &input); //choisir un type d'entreprise
@@ -200,10 +222,10 @@ void inscription (Companies *cp)
 
     if (currentCompanyType)
     {
-        
+
         scanf("%s", &input);
-        
-       
+
+
         if (!existCompanyByName(input, cp)) //si l'entreprise n'existe pas il l'enregistre
         {
             strcpy(cp->companies[cp->countCompany].name, input);
@@ -222,29 +244,29 @@ void inscription (Companies *cp)
     }
 }
 
-void mission(Missions *m, Companies *cp)
+void mission(Missions* m, Companies* cp)
 {
     short currentID;
     scanf("%hu", &currentID); //on donne l'ID d'une entreprise
-    CompanyType type[2] = {OP, ND}; //doit etre de type OP
+    CompanyType type[2] = { OP, ND }; //doit etre de type OP
     currentID--;
 
-    //si il trouve un opérateur avec l'ID donné on donne les paramètres de mission
+    //si il trouve un opÃ©rateur avec l'ID donnÃ© on donne les paramÃ©tres de mission
     if (findCompany(cp, &currentID, type))
     {
         char input[LIMIT_STRING];
         scanf("%s", &input); //c'est le nom de la mission
 
         float currentRemuneration;
-        scanf("%f", &currentRemuneration); //entrée de la rémunération de la mission
-        if (currentRemuneration <= 0)//si la rémunération est inférieur ou égale a 0 elle est invalide
+        scanf("%f", &currentRemuneration); //entrÃ©e de la rÃ©munÃ©ration de la mission
+        if (currentRemuneration <= 0)//si la rÃ©munÃ©ration est infÃ©rieur ou Ã©gale a 0 elle est invalide
         {
             printf("Remuneration incorrecte\n");
         }
         else
         {
-            //on intègre les paramètres de la mission a la structure "Mission
-            makeMission(m, input, currentRemuneration, currentID, DEFAULT_SUBSTRACT_COUNT, UNDEF_ID_SUBTRACT, SUCCESS); //success car par défaut mais la mission n'est pas réalisé
+            //on intÃ©gre les paramÃ©tres de la mission a la structure "Mission
+            makeMission(m, input, currentRemuneration, currentID, DEFAULT_SUBSTRACT_COUNT, UNDEF_ID_SUBTRACT, SUCCESS, INIT_ID_FAILED); //success car par dÃ©faut mais la mission n'est pas rÃ©alisÃ©
             printf("Mission publiee (%u)\n", m->countMission);
 
         }
@@ -255,11 +277,11 @@ void mission(Missions *m, Companies *cp)
     }
 }
 
-void consultation(Missions *m, Companies *cp) {
+void consultation(Missions* m, Companies* cp) {
     unsigned short findMission = 0;
     for (unsigned short k = 0; k < m->countMission; k++)
     {
-        if (m->missions[k].state == NATT) // vérifie si la mission est de type 
+        if (m->missions[k].state == NATT) // vÃ©rifie si la mission est de type 
         {
             showMission(&k, &(m->missions[k]), cp->companies[m->missions[k].company].name);
             findMission++;
@@ -272,17 +294,17 @@ void consultation(Missions *m, Companies *cp) {
 
 }
 
-void detail(Missions *m, Company companies[MAX_COMPANY])
+void detail(Missions* m, Company companies[MAX_COMPANY])
 {
     short currentID;
-    scanf("%hu", &currentID); //ID de la mission dont on veut le détail
+    scanf("%hu", &currentID); //ID de la mission dont on veut le dÃ©tail
 
     currentID--;
 
     if (!findMissions(m, &currentID, NATT))
     {
         printf("Identifiant incorrect\n");
-    } 
+    }
     else
     {
         showMission(&currentID, &m->missions[currentID], companies[m->missions[currentID].company].name);
@@ -290,11 +312,11 @@ void detail(Missions *m, Company companies[MAX_COMPANY])
     }
 }
 
-void acceptation(Missions *m, Companies *cp)
+void acceptation(Missions* m, Companies* cp)
 {
     short currentID;
-    scanf("%hu", &currentID); //sélection de la société qui accepte la mission via son ID
-    CompanyType type[2] = {AG, IN}; // doit etre de type AG ou IN
+    scanf("%hu", &currentID); //sÃ©lection de la sociÃ©tÃ© qui accepte la mission via son ID
+    CompanyType type[2] = { AG, IN }; // doit etre de type AG ou IN
     currentID--;
 
     if (!findCompany(cp, &currentID, type))
@@ -305,13 +327,18 @@ void acceptation(Missions *m, Companies *cp)
     else
     {
         unsigned char j = currentID;
-        scanf("%hu", &currentID); //ID de la mission dont on veut le détail
+        scanf("%hu", &currentID); //ID de la mission dont on veut le dÃ©tail
 
         currentID--;
 
         if (!findMissions(m, &currentID, NATT))
         {
             printf("Mission incorrecte\n");
+        }
+
+        else if(failedCompany(&(m->missions[currentID]), j))
+        {
+            printf("Entreprise incorrecte\n");
         }
 
         else
@@ -323,12 +350,12 @@ void acceptation(Missions *m, Companies *cp)
     }
 }
 
-void sousTraitance(Missions *m, Companies *cp)
+void sousTraitance(Missions* m, Companies* cp)
 {
     short currentID;
     scanf("%hu", &currentID); //ID entreprise
-    CompanyType type[2] = {AG, ND}; //l'entreprise doit être de type AG
-    
+    CompanyType type[2] = { AG, ND }; //l'entreprise doit Ã©tre de type AG
+
     currentID--;
 
     if (!findCompany(cp, &currentID, type))
@@ -347,14 +374,14 @@ void sousTraitance(Missions *m, Companies *cp)
             printf("Mission incorrecte\n");
         }
 
-        else if (m->missions[currentID].subcontractingCount > MAX_SUBCONTRACT)
+        else if (m->missions[currentID].subcontractingCount >= MAX_SUBCONTRACT)
         {
             printf("Mission incorrecte\n");
         }
         else
         {
             float currentRemuneration;
-            scanf("%f", &currentRemuneration); //définition de la rémunération
+            scanf("%f", &currentRemuneration); //dÃ©finition de la rÃ©munÃ©ration
             if (currentRemuneration <= 0)
             {
                 printf("Remuneration incorrecte\n");
@@ -362,7 +389,7 @@ void sousTraitance(Missions *m, Companies *cp)
             else
             {
                 //mise en place d'une nouvelle mission
-                makeMission(m, m->missions[currentID].name, currentRemuneration, j, m->missions[currentID].subcontractingCount + 1, currentID, m->missions[currentID].rapport);
+                makeMission(m, m->missions[currentID].name, currentRemuneration, j, m->missions[currentID].subcontractingCount + 1, currentID, m->missions[currentID].rapport, UNDEF_ID_FAILED);
                 m->missions[currentID].state = ATT;
                 printf("Sous-traitance enregistree (%u)\n", m->countMission);
             }
@@ -370,16 +397,16 @@ void sousTraitance(Missions *m, Companies *cp)
     }
 }
 
-void rapport(const float rapportRem[MAX_RAPPORT], Missions *m)
+void rapport(const float rapportRem[MAX_RAPPORT], Missions* m)
 {
     short currentID;
     scanf("%hu", &currentID); //ID de la mission dont on doit faire le rapport
-    
+
     currentID--;
 
-    //cherche la mission dont on a donné l'ID
-    
-    if (!findMissions(m, &currentID, ATT))//si il n'as pas trouvé
+    //cherche la mission dont on a donnÃ© l'ID
+
+    if (!findMissions(m, &currentID, ATT))//si il n'as pas trouvÃ©
     {
         printf("Mission incorrect\n");
     }
@@ -389,7 +416,7 @@ void rapport(const float rapportRem[MAX_RAPPORT], Missions *m)
         scanf("%hu", &currentID);
         switch (currentID)
         {
-        case SUCCESS: //si la mission est un succès
+        case SUCCESS: //si la mission est un succÃ©s
             m->missions[k].state = TER;
             short id = m->missions[k].idSubcontracting;
             while (id > -1)
@@ -402,8 +429,8 @@ void rapport(const float rapportRem[MAX_RAPPORT], Missions *m)
 
         case LNA:
         case PSBG:
-        case RD: //si la mission a pour code de retour autre que succès:
-            makeMission(m, m->missions[k].name, arroundFloat(m->missions[k].remuneration * rapportRem[currentID]), m->missions[k].company, m->missions[k].subcontractingCount, k, m->missions[k].rapport * 10 + currentID);
+        case RD: //si la mission a pour code de retour autre que succÃ©s:
+            makeMission(m, m->missions[k].name, m->missions[k].remuneration * rapportRem[currentID], m->missions[k].company, m->missions[k].subcontractingCount, k, m->missions[k].rapport * 10 + currentID, k);
             m->missions[k].state = TER;
             printf("Rapport enregistre (%u)\n", m->countMission);
             break;
@@ -415,17 +442,17 @@ void rapport(const float rapportRem[MAX_RAPPORT], Missions *m)
     }
 }
 
-void printRecap(char t[MAX_RECAP_TITLE], PrintReccapStruct *prs, Mission missions[MAX_MISSION], Company companies[MAX_COMPANY])
+void printRecap(char t[MAX_RECAP_TITLE], PrintReccapStruct* prs, Mission missions[MAX_MISSION], Company companies[MAX_COMPANY])
 {
     printf("%s\n", t);
-    for (short i = 0; i <= prs->len; i++) //ici le programme parcours le tableau et affiche toutes les missions qui y sont ce shéma est répété par la suite.
+    for (short i = 0; i <= prs->len; i++) //ici le programme parcours le tableau et affiche toutes les missions qui y sont ce shÃ©ma est rÃ©pÃ©tÃ© par la suite.
     {
         printf("  ");
         showMission(&prs->table[i], &missions[prs->table[i]], companies[missions[prs->table[i]].company].name);
     }
 }
 
-void recapitulatif(Missions *m, Companies *cp)
+void recapitulatif(Missions* m, Companies* cp)
 {
     short currentID;
     scanf("%hu", &currentID);//ID entreprise
@@ -434,13 +461,13 @@ void recapitulatif(Missions *m, Companies *cp)
     currentID--;
 
 
-    if (!findCompany(cp, &currentID, type))//si il trouve pas l'ID d'entreprise donné
+    if (!findCompany(cp, &currentID, type))//si il trouve pas l'ID d'entreprise donnÃ©
     {
         printf("Entreprise incorrecte\n");
     }
     else //si il trouve l'ID
     {
-        //initialisation des tableaux dans lesquels les missions seront affichées
+        //initialisation des tableaux dans lesquels les missions seront affichÃ©es
         PrintReccapStruct non_attribuees;
         PrintReccapStruct attribuees;
         PrintReccapStruct terminees;
@@ -452,21 +479,21 @@ void recapitulatif(Missions *m, Companies *cp)
 
         for (unsigned short k = 0; k < m->countMission; k++)
         {
-            if (m->missions[k].company == currentID) //cherche toutes le missions qu l'entreprise a publié
+            if (m->missions[k].company == currentID) //cherche toutes le missions qu l'entreprise a publiÃ©
             {
                 switch (m->missions[k].state)
                 {
-                case NATT: //missions non attribuées
+                case NATT: //missions non attribuÃ©es
                     non_attribuees.len++;
                     non_attribuees.table[non_attribuees.len] = k;
                     break;
 
-                case ATT: //missions attribuées
+                case ATT: //missions attribuÃ©es
                     attribuees.len++;
                     attribuees.table[attribuees.len] = k;
                     break;
 
-                case TER: //missions terminées
+                case TER: //missions terminÃ©es
                     terminees.len++;
                     terminees.table[terminees.len] = k;
                     break;
@@ -476,15 +503,15 @@ void recapitulatif(Missions *m, Companies *cp)
                 }
             }
 
-            //cherche toutes les missions acceptées par l'entreprise
+            //cherche toutes les missions acceptÃ©es par l'entreprise
             else if (m->missions[k].acceptedBy == currentID)
             {
-                if (m->missions[k].state == ATT) //toutes les missions a réaliser
+                if (m->missions[k].state == ATT) //toutes les missions a rÃ©aliser
                 {
                     a_realiser.len++;
                     a_realiser.table[a_realiser.len] = k;
                 }
-                else if (m->missions[k].state == TER) //toutes les missions qui ont étés réalisées
+                else if (m->missions[k].state == TER) //toutes les missions qui ont Ã©tÃ©s rÃ©alisÃ©es
                 {
                     realisees.len++;
                     realisees.table[realisees.len] = k;
@@ -492,29 +519,29 @@ void recapitulatif(Missions *m, Companies *cp)
             }
         }
 
-        
 
-        if (non_attribuees.len > -1) //affiche toutes les missions non attribuées
+
+        if (non_attribuees.len > -1) //affiche toutes les missions non attribuÃ©es
         {
             printRecap("* non attribuees", &non_attribuees, m->missions, cp->companies);
         }
 
-        if (attribuees.len > -1) //affiche toutes les missions attribuées
+        if (attribuees.len > -1) //affiche toutes les missions attribuÃ©es
         {
             printRecap("* attribuees", &attribuees, m->missions, cp->companies);
         }
 
-        if (terminees.len > -1) //affiche toutes les missions terminées
+        if (terminees.len > -1) //affiche toutes les missions terminÃ©es
         {
             printRecap("* terminees", &terminees, m->missions, cp->companies);
         }
 
-        if (a_realiser.len > -1) //affiche toutes les missions que l'entreprise dois réaliser
+        if (a_realiser.len > -1) //affiche toutes les missions que l'entreprise dois rÃ©aliser
         {
             printRecap("* a realiser", &a_realiser, m->missions, cp->companies);
         }
 
-        if (realisees.len > -1)  //affiche toutes les missions que l'entreprise a réalisées
+        if (realisees.len > -1)  //affiche toutes les missions que l'entreprise a rÃ©alisÃ©es
         {
             printRecap("* realisees", &realisees, m->missions, cp->companies);
         }
@@ -523,7 +550,7 @@ void recapitulatif(Missions *m, Companies *cp)
 
 int main()
 {
-    //définition des variables des tableaux 
+    //dÃ©finition des variables des tableaux 
 
     char input[LIMIT_STRING] = "";
 
@@ -537,9 +564,9 @@ int main()
 
     do
     {
-        scanf("%s", &input); //entrée d'une chaine de caractères
+        scanf("%s", &input); //entrÃ©e d'une chaine de caractÃ©res
 
-        if (strcmp(input, "inscription") == 0) //débute le processus d'inscription d'une entreprise
+        if (strcmp(input, "inscription") == 0) //dÃ©bute le processus d'inscription d'une entreprise
         {
             inscription(&companies);
         }
@@ -550,13 +577,13 @@ int main()
             mission(&missions, &companies);
         }
 
-        //affichage de toutes les missions non attribuées
+        //affichage de toutes les missions non attribuÃ©es
         else if (strcmp(input, "consultation") == 0)
         {
             consultation(&missions, &companies);
         }
 
-        //détail d'une mission non attribuée séléctionée grace a son ID
+        //dÃ©tail d'une mission non attribuÃ©e sÃ©lÃ©ctionÃ©e grace a son ID
         else if (strcmp(input, "detail") == 0)
         {
             detail(&missions, companies.companies);
@@ -579,7 +606,7 @@ int main()
         {
             rapport(rapportRem, &missions);
         }
-        //la fonction récapitulatif nécessite la chaine de caractère "recapitulatif" et l'ID d'une entreprise 
+        //la fonction rÃ©capitulatif nÃ©cessite la chaine de caractÃ©re "recapitulatif" et l'ID d'une entreprise 
         else if (strcmp(input, "recapitulatif") == 0)
         {
             recapitulatif(&missions, &companies);
